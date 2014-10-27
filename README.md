@@ -1,4 +1,24 @@
 #NSURL+Parameters
+
+## 添加功能
+
+forked from [carlj/NSURL-Parameters](https://github.com/carlj/NSURL-Parameters)
+
+增加了
+
+```
+- (NSArray *)parametersForKey:(NSString *)key
+```
+
+目的是，针对类似下面的需求：
+
+```
+http://localhost/index?user=a1&user=b1
+```
+
+使用`parametersForKey`方法可以得到参数值的数组。
+
+
 Category to access the URL Parameters within your [`NSURL`](https://developer.apple.com/library/ios/documentation/Cocoa/Reference/Foundation/Classes/NSURL_Class/Reference/Reference.html)
 
 [![Build Status](https://travis-ci.org/carlj/NSURL-Parameters.png?branch=master)](https://travis-ci.org/carlj/NSURL-Parameters)
