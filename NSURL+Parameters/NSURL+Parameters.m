@@ -14,60 +14,70 @@ static void *kURLParametersDictionaryKey;
 @implementation NSURL (Parameters)
 
 - (void)scanParameters {
-  
-  if (self.isFileURL) {
-    return;
-  }
-  
-  NSScanner *scanner = [NSScanner scannerWithString: self.absoluteString];
-  [scanner setCharactersToBeSkipped: [NSCharacterSet characterSetWithCharactersInString:@"&?"] ];
-  //skip to ?
-  [scanner scanUpToString:@"?" intoString: nil];
-  
-  
-  NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-  NSString *tmpValue;
-  while ([scanner scanUpToString:@"&" intoString:&tmpValue]) {
     
-    NSArray *components = [tmpValue componentsSeparatedByString:@"="];
-    
-    if (components.count >= 2) {
-      NSString *key = [components[0] stringByReplacingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-      NSString *value = [components[1] stringByReplacingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-      
-      parameters[key] = value;
+    if (self.isFileURL) {
+        return;
     }
-  }
-  
-  self.parameters = parameters;
+    
+    NSScanner *scanner = [NSScanner scannerWithString: self.absoluteString];
+    [scanner setCharactersToBeSkipped: [NSCharacterSet characterSetWithCharactersInString:@"&?"] ];
+    //skip to ?
+    [scanner scanUpToString:@"?" intoString: nil];
+    
+    
+    NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
+    NSString *tmpValue;
+    while ([scanner scanUpToString:@"&" intoString:&tmpValue]) {
+        
+        NSArray *components = [tmpValue componentsSeparatedByString:@"="];
+        
+        if (components.count >= 2) {
+            NSString *key = [components[0] stringByReplacingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
+            NSString *value = [components[1] stringByReplacingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
+            
+            if (!parameters[key]) {
+                NSMutableArray *array=[NSMutableArray new];
+                [array addObject:value];
+                parameters[key]=array;
+            }else{
+                NSMutableArray *array=parameters[key];
+                [array addObject:value];
+            }
+        }
+    }
+    
+    self.parameters = parameters;
 }
 
 - (id)objectForKeyedSubscript:(id)key {
-  
-  return self.parameters[key];
+    return self.parameters[key];
 }
 
 
 - (NSString *)parameterForKey:(NSString *)key {
-  
-  return self.parameters[key];
+    NSArray *array=self.parameters[key];
+    return array.lastObject;
+}
+
+- (NSArray *)parametersForKey:(NSString *)key{
+    return self.parameters[key];
 }
 
 - (NSDictionary *)parameters {
-  
-  NSDictionary *result = objc_getAssociatedObject(self, &kURLParametersDictionaryKey);
-
-  if (!result) {
-    [self scanParameters];
-  }
-  
-  return objc_getAssociatedObject(self, &kURLParametersDictionaryKey);
+    
+    NSDictionary *result = objc_getAssociatedObject(self, &kURLParametersDictionaryKey);
+    
+    if (!result) {
+        [self scanParameters];
+    }
+    
+    return objc_getAssociatedObject(self, &kURLParametersDictionaryKey);
 }
 
 - (void)setParameters:(NSDictionary *)parameters {
-  
-  objc_setAssociatedObject(self, &kURLParametersDictionaryKey, parameters, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-
+    
+    objc_setAssociatedObject(self, &kURLParametersDictionaryKey, parameters, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
 }
 
 @end
